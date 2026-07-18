@@ -61,11 +61,13 @@
         /* Custom Range Slider */
         input[type=range] {
             -webkit-appearance: none;
+            appearance: none;
             width: 100%;
             background: transparent;
         }
         input[type=range]::-webkit-slider-thumb {
             -webkit-appearance: none;
+            appearance: none;
             height: 20px;
             width: 20px;
             border-radius: 50%;
@@ -131,10 +133,10 @@
     <header class="bg-surface shadow-sm border-b border-slate-200 sticky top-0 z-50">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex flex-col md:flex-row items-center justify-between gap-4">
             <div class="flex items-center gap-4">
-                <img src="./2.png" alt="مؤسسة بنساعد" class="h-16 w-auto object-contain">
+                <img src="2.png" alt="مؤسسة بنساعد" class="h-16 w-auto object-contain">
                 <div>
-                    <h1 class="text-xl md:text-2xl font-bold text-text-main">تصور للميزانية</h1>
-                    <p class="text-sm text-text-muted font-medium">اليوم الترفيهي  للأطفال</p>
+                    <h1 class="text-xl md:text-2xl font-bold text-text-main">  تصور للميزانية </h1>
+                    <p class="text-sm text-text-muted font-medium">اليوم الترفيهي السنوي للأطفال</p>
                 </div>
             </div>
             
@@ -281,11 +283,82 @@
                     </div>
                 </section>
 
-                <!-- Section 4: Logistics -->
+                <!-- Section 4: Meals & Nutrition (NEW) -->
                 <section class="bg-surface rounded-2xl p-6 shadow-soft border border-slate-100 interactive-card">
-                    <h2 class="text-lg font-bold text-text-main mb-6">اللوجستيات والانتقالات</h2>
+                    <div class="flex justify-between items-center mb-5">
+                        <div>
+                            <h2 class="text-lg font-bold text-text-main">التغذية والوجبات</h2>
+                            <p class="text-sm text-text-muted">تحديد تفاصيل ومكونات الوجبات لكل فرد.</p>
+                        </div>
+                        <div class="text-left bg-slate-50 px-3 py-1.5 rounded text-sm font-bold text-text-main">
+                            للفرد الواحد: <span id="food-per-person-display" class="text-primary-600">82</span> ج
+                        </div>
+                    </div>
+
+                    <div class="space-y-4">
+                        <!-- Breakfast -->
+                        <div class="flex items-start justify-between p-4 rounded-xl border border-slate-100 hover:border-primary-100 bg-slate-50 transition-colors">
+                            <div class="pr-1">
+                                <span class="block text-sm font-bold text-text-main">وجبة الإفطار</span>
+                                <span class="block text-xs text-text-muted mt-1 leading-relaxed">تتكون من (باتيه + علبة عصير) توزع صباحاً في الأتوبيس.</span>
+                                <span class="inline-block mt-2 text-xs font-bold text-primary-600 bg-primary-50 px-2 py-1 rounded">15 ج.م</span>
+                            </div>
+                            <div class="relative inline-block w-12 ml-2 mt-1 align-middle select-none transition duration-200 ease-in">
+                                <input type="checkbox" id="meal-breakfast" class="toggle-checkbox absolute block w-6 h-6 rounded-full bg-white border-4 appearance-none cursor-pointer" onchange="updateSimulation()" checked>
+                                <label for="meal-breakfast" class="toggle-label block overflow-hidden h-6 rounded-full bg-slate-300 cursor-pointer"></label>
+                            </div>
+                        </div>
+
+                        <!-- Lunch Builder -->
+                        <div class="p-4 rounded-xl border border-slate-200">
+                            <div class="mb-3 border-b border-slate-100 pb-2">
+                                <span class="block text-sm font-bold text-text-main">تكوين وجبة الغداء</span>
+                                <span class="block text-xs text-text-muted mt-1">اختر الساندوتشات المكونة للوجبة الرئيسية:</span>
+                            </div>
+                            
+                            <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                                <label class="relative flex items-center justify-between p-3 rounded-lg border border-slate-100 hover:bg-slate-50 cursor-pointer transition-colors">
+                                    <div>
+                                        <span class="block text-sm font-bold text-text-main">كفتة</span>
+                                        <span class="block text-xs text-text-muted mt-0.5">30 ج.م</span>
+                                    </div>
+                                    <input type="checkbox" id="meal-kofta" class="w-5 h-5 accent-[#30a7b4] cursor-pointer" onchange="updateSimulation()" checked>
+                                </label>
+                                
+                                <label class="relative flex items-center justify-between p-3 rounded-lg border border-slate-100 hover:bg-slate-50 cursor-pointer transition-colors">
+                                    <div>
+                                        <span class="block text-sm font-bold text-text-main">بانيه</span>
+                                        <span class="block text-xs text-text-muted mt-0.5">15 ج.م</span>
+                                    </div>
+                                    <input type="checkbox" id="meal-pane" class="w-5 h-5 accent-[#30a7b4] cursor-pointer" onchange="updateSimulation()" checked>
+                                </label>
+
+                                <label class="relative flex items-center justify-between p-3 rounded-lg border border-slate-100 hover:bg-slate-50 cursor-pointer transition-colors">
+                                    <div>
+                                        <span class="block text-sm font-bold text-text-main">بطاطس</span>
+                                        <span class="block text-xs text-text-muted mt-0.5">5 ج.م</span>
+                                    </div>
+                                    <input type="checkbox" id="meal-batates" class="w-5 h-5 accent-[#30a7b4] cursor-pointer" onchange="updateSimulation()" checked>
+                                </label>
+                            </div>
+                        </div>
+                        
+                        <!-- Extras -->
+                        <div class="flex items-center justify-between p-3 rounded-lg border border-slate-100">
+                            <div>
+                                <span class="block text-sm font-bold text-text-main">نثريات المياه والضيافة</span>
+                                <span class="block text-xs text-text-muted mt-0.5">زجاجات مياه، خبز إضافي، ومستلزمات تعبئة.</span>
+                            </div>
+                            <span class="text-sm font-bold text-text-main">~ 17 ج.م</span>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Section 5: Logistics -->
+                <section class="bg-surface rounded-2xl p-6 shadow-soft border border-slate-100 interactive-card">
+                    <h2 class="text-lg font-bold text-text-main mb-6">الانتقالات واللوجستيات</h2>
                     
-                    <div class="mb-6">
+                    <div>
                         <div class="flex justify-between items-end mb-3">
                             <label class="block text-sm font-bold text-text-main">تكلفة أتوبيسات الانتقال</label>
                             <span class="text-sm font-bold text-primary-600 bg-primary-50 px-2 py-1 rounded" id="transport-display">5,000 ج.م</span>
@@ -294,24 +367,6 @@
                         <div class="flex justify-between text-xs text-text-light mt-2">
                             <span>متوسط (3,000)</span>
                             <span>الحد الأقصى (8,000)</span>
-                        </div>
-                    </div>
-
-                    <div class="bg-slate-50 rounded-lg p-4 border border-slate-100">
-                        <h3 class="text-sm font-bold text-text-main mb-3"> التغذية (للفرد الواحد)</h3>
-                        <div class="grid grid-cols-2 gap-4 text-sm">
-                            <div class="flex justify-between border-b border-slate-200 pb-2">
-                                <span class="text-text-muted">وجبة الإفطار:</span>
-                                <strong class="text-text-main">15 ج.م</strong>
-                            </div>
-                            <div class="flex justify-between border-b border-slate-200 pb-2">
-                                <span class="text-text-muted">وجبة الغداء:</span>
-                                <strong class="text-text-main">50 ج.م</strong>
-                            </div>
-                            <div class="flex justify-between col-span-2">
-                                <span class="text-text-muted">نثريات (مياه، خبز، تغليف):</span>
-                                <strong class="text-text-main">~ 17 ج.م للفرد</strong>
-                            </div>
                         </div>
                     </div>
                 </section>
@@ -458,7 +513,11 @@
         const RATES = {
             food: {
                 breakfast: 15,
-                lunch: 50,
+                lunch: {
+                    kofta: 30,
+                    pane: 15,
+                    batates: 5
+                },
                 miscPerPerson: 17 // Represents bread, water, packaging approx per person
             },
             venue: {
@@ -484,6 +543,12 @@
                 rides: false,
                 train: false,
                 horror: false
+            },
+            meals: {
+                breakfast: true,
+                kofta: true,
+                pane: true,
+                batates: true
             },
             previousTotal: 0
         };
@@ -573,6 +638,11 @@
             state.activities.train = document.getElementById('act-train').checked;
             state.activities.horror = document.getElementById('act-horror').checked;
 
+            state.meals.breakfast = document.getElementById('meal-breakfast').checked;
+            state.meals.kofta = document.getElementById('meal-kofta').checked;
+            state.meals.pane = document.getElementById('meal-pane').checked;
+            state.meals.batates = document.getElementById('meal-batates').checked;
+
             // Handle UI toggle for Activities Section (Disable if Azhar)
             const activitiesSection = document.getElementById('activities-section');
             if (state.venue === 'azhar') {
@@ -585,7 +655,12 @@
 
             // 2. Calculate Costs
             // Food
-            const foodPerPerson = RATES.food.breakfast + RATES.food.lunch + RATES.food.miscPerPerson;
+            let foodPerPerson = RATES.food.miscPerPerson; // Base extras (Water, bread)
+            if (state.meals.breakfast) foodPerPerson += RATES.food.breakfast;
+            if (state.meals.kofta) foodPerPerson += RATES.food.lunch.kofta;
+            if (state.meals.pane) foodPerPerson += RATES.food.lunch.pane;
+            if (state.meals.batates) foodPerPerson += RATES.food.lunch.batates;
+            
             const totalFood = foodPerPerson * state.attendees;
 
             // Entry
@@ -615,6 +690,7 @@
             // Sliders Display
             document.getElementById('attendees-display').innerText = state.attendees;
             document.getElementById('transport-display').innerText = totalTransport.toLocaleString() + ' ج.م';
+            document.getElementById('food-per-person-display').innerText = foodPerPerson;
             
             // Breakdowns
             document.getElementById('activities-subtotal').innerText = totalActivities.toLocaleString();
