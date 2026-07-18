@@ -1,0 +1,664 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>محاكاة ميزانية اليوم الترفيهي - مؤسسة بنساعد</title>
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@300;400;500;700;800;900&display=swap" rel="stylesheet">
+    
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: {
+                            50: '#f1fafa',
+                            100: '#def3f5',
+                            200: '#c0e6eb',
+                            300: '#94d3db',
+                            400: '#60b7c4',
+                            500: '#30a7b4', // Brand Color
+                            600: '#2c8594',
+                            700: '#276b78',
+                            800: '#255864',
+                            900: '#224a54',
+                        },
+                        surface: '#ffffff',
+                        background: '#f8fafc',
+                        text: {
+                            main: '#1e293b', // slate-800
+                            muted: '#64748b', // slate-500
+                            light: '#94a3b8'  // slate-400
+                        }
+                    },
+                    fontFamily: {
+                        sans: ['Tajawal', 'sans-serif'],
+                    },
+                    boxShadow: {
+                        'soft': '0 4px 20px -2px rgba(0, 0, 0, 0.05)',
+                        'inner-soft': 'inset 0 2px 4px 0 rgba(0, 0, 0, 0.02)',
+                    }
+                }
+            }
+        }
+    </script>
+    
+    <style>
+        body {
+            background-color: #f8fafc;
+            color: #1e293b;
+            -webkit-font-smoothing: antialiased;
+        }
+        
+        /* Smooth transitions for all interactive elements */
+        .interactive-card {
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        
+        /* Custom Range Slider */
+        input[type=range] {
+            -webkit-appearance: none;
+            width: 100%;
+            background: transparent;
+        }
+        input[type=range]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            height: 20px;
+            width: 20px;
+            border-radius: 50%;
+            background: #30a7b4;
+            cursor: pointer;
+            margin-top: -8px;
+            box-shadow: 0 2px 6px rgba(48, 167, 180, 0.4);
+            border: 2px solid #ffffff;
+            transition: transform 0.1s;
+        }
+        input[type=range]::-webkit-slider-thumb:active {
+            transform: scale(1.15);
+        }
+        input[type=range]::-webkit-slider-runnable-track {
+            width: 100%;
+            height: 6px;
+            cursor: pointer;
+            background: #e2e8f0;
+            border-radius: 4px;
+        }
+        input[type=range]:focus {
+            outline: none;
+        }
+        
+        /* Toggle Switch Customization */
+        .toggle-checkbox:checked {
+            right: 0;
+            border-color: #30a7b4;
+        }
+        .toggle-checkbox:checked + .toggle-label {
+            background-color: #30a7b4;
+        }
+        .toggle-checkbox {
+            right: 0;
+            z-index: 1;
+            border-color: #e2e8f0;
+            transition: all 0.2s ease;
+        }
+        .toggle-label {
+            background-color: #e2e8f0;
+            transition: all 0.2s ease;
+        }
+        
+        /* Radio Card Selection */
+        .radio-card-input:checked + .radio-card-body {
+            border-color: #30a7b4;
+            background-color: #f1fafa;
+            box-shadow: 0 0 0 1px #30a7b4;
+        }
+        
+        /* Number Animation class */
+        .value-update {
+            animation: pulse-color 0.5s ease-out;
+        }
+        @keyframes pulse-color {
+            0% { color: #30a7b4; transform: scale(1.05); }
+            100% { color: inherit; transform: scale(1); }
+        }
+    </style>
+</head>
+<body class="font-sans min-h-screen pb-20">
+
+    <header class="bg-surface shadow-sm border-b border-slate-200 sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex flex-col md:flex-row items-center justify-between gap-4">
+            <div class="flex items-center gap-4">
+                <img src="./2.png" alt="مؤسسة بنساعد" class="h-16 w-auto object-contain">
+                <div>
+                    <h1 class="text-xl md:text-2xl font-bold text-text-main">منصة محاكاة الميزانية</h1>
+                    <p class="text-sm text-text-muted font-medium">اليوم الترفيهي السنوي للأطفال</p>
+                </div>
+            </div>
+            
+            <div class="bg-primary-50 px-5 py-2.5 rounded-lg border border-primary-100 flex items-center gap-3">
+                <span class="text-sm text-primary-800 font-semibold">التكلفة التقديرية الحالية</span>
+                <div class="text-2xl font-black text-primary-600 tracking-tight flex items-baseline gap-1">
+                    <span id="header-total">0</span> <span class="text-sm font-bold text-primary-500">ج.م</span>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
+        
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
+            
+            <!-- LEFT PANEL: Controls (8 cols on lg) -->
+            <div class="lg:col-span-7 space-y-6">
+                
+                <!-- Section 1: Demographics -->
+                <section class="bg-surface rounded-2xl p-6 shadow-soft border border-slate-100 interactive-card">
+                    <div class="flex justify-between items-end mb-6">
+                        <div>
+                            <h2 class="text-lg font-bold text-text-main">أعداد المشاركين</h2>
+                            <p class="text-sm text-text-muted mt-1">تحديد العدد الإجمالي يؤثر على كافة حسابات التغذية والدخول.</p>
+                        </div>
+                        <div class="text-center">
+                            <span class="block text-3xl font-black text-primary-500" id="attendees-display">65</span>
+                            <span class="text-xs font-bold text-text-muted uppercase tracking-wider">فرد</span>
+                        </div>
+                    </div>
+                    
+                    <div class="relative pt-2">
+                        <input type="range" id="attendees-slider" min="30" max="150" step="5" value="65" oninput="updateSimulation()">
+                        <div class="flex justify-between text-xs font-medium text-text-light mt-3">
+                            <span>30 (الحد الأدنى)</span>
+                            <span>العدد المستهدف (65)</span>
+                            <span>150 (الحد الأقصى)</span>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Section 2: Venue Selection -->
+                <section class="bg-surface rounded-2xl p-6 shadow-soft border border-slate-100 interactive-card">
+                    <h2 class="text-lg font-bold text-text-main mb-1">وجهة الرحلة</h2>
+                    <p class="text-sm text-text-muted mb-5">اختر الحديقة المراد تنظيم الفعالية بها لمقارنة التكاليف.</p>
+                    
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <!-- Option 1: Intl Park -->
+                        <label class="relative cursor-pointer">
+                            <input type="radio" name="venue" value="international" class="peer sr-only radio-card-input" onchange="updateSimulation()" checked>
+                            <div class="radio-card-body h-full rounded-xl border-2 border-slate-200 p-5 transition-all hover:border-primary-300">
+                                <div class="flex justify-between items-start mb-2">
+                                    <h3 class="font-bold text-text-main text-lg">الحديقة الدولية</h3>
+                                    <span class="w-4 h-4 rounded-full border-2 border-slate-300 peer-checked:border-primary-500 peer-checked:bg-primary-500 flex items-center justify-center relative">
+                                        <span class="w-2 h-2 rounded-full bg-white opacity-0 transition-opacity"></span>
+                                    </span>
+                                </div>
+                                <p class="text-sm text-text-muted mb-4 border-b border-slate-100 pb-3">مدينة نصر - عباس العقاد</p>
+                                <div class="space-y-2 text-sm">
+                                    <div class="flex justify-between"><span class="text-text-light">رسم الدخول:</span> <strong class="text-text-main">20 ج.م / فرد</strong></div>
+                                    <div class="flex justify-between"><span class="text-text-light">الأنشطة:</span> <strong class="text-text-main">تُحسب منفصلة</strong></div>
+                                </div>
+                            </div>
+                        </label>
+
+                        <!-- Option 2: Azhar Park -->
+                        <label class="relative cursor-pointer">
+                            <input type="radio" name="venue" value="azhar" class="peer sr-only radio-card-input" onchange="updateSimulation()">
+                            <div class="radio-card-body h-full rounded-xl border-2 border-slate-200 p-5 transition-all hover:border-primary-300">
+                                <div class="flex justify-between items-start mb-2">
+                                    <h3 class="font-bold text-text-main text-lg">حديقة الأزهر</h3>
+                                    <span class="w-4 h-4 rounded-full border-2 border-slate-300 flex items-center justify-center relative">
+                                        <!-- Custom tick indicator handled by CSS -->
+                                    </span>
+                                </div>
+                                <p class="text-sm text-text-muted mb-4 border-b border-slate-100 pb-3">طريق صلاح سالم</p>
+                                <div class="space-y-2 text-sm">
+                                    <div class="flex justify-between"><span class="text-text-light">رسم الدخول:</span> <strong class="text-text-main">35 ج.م / فرد</strong></div>
+                                    <div class="flex justify-between text-xs text-text-muted mt-2 leading-relaxed">تذكرة موحدة تشمل المساحات الخضراء، لا توجد أنشطة إضافية مدفوعة محددة.</div>
+                                </div>
+                            </div>
+                        </label>
+                    </div>
+                </section>
+
+                <!-- Section 3: Activities (Dynamic) -->
+                <section id="activities-section" class="bg-surface rounded-2xl p-6 shadow-soft border border-slate-100 interactive-card transition-all duration-300">
+                    <div class="flex justify-between items-center mb-5">
+                        <div>
+                            <h2 class="text-lg font-bold text-text-main">باقة الأنشطة الإضافية</h2>
+                            <p class="text-sm text-text-muted">متاحة فقط داخل الحديقة الدولية.</p>
+                        </div>
+                        <div class="text-left bg-slate-50 px-3 py-1.5 rounded text-sm font-bold text-text-main">
+                            الإجمالي: <span id="activities-subtotal" class="text-primary-600">0</span> ج
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                        <!-- Activity Toggles -->
+                        <div class="flex items-center justify-between p-3 rounded-lg border border-slate-100 hover:bg-slate-50 transition-colors">
+                            <div>
+                                <span class="block text-sm font-bold text-text-main">حديقة الحيوان</span>
+                                <span class="block text-xs text-text-light mt-0.5">15 ج.م / فرد</span>
+                            </div>
+                            <div class="relative inline-block w-12 mr-2 align-middle select-none transition duration-200 ease-in">
+                                <input type="checkbox" id="act-zoo" class="toggle-checkbox absolute block w-6 h-6 rounded-full bg-white border-4 appearance-none cursor-pointer" onchange="updateSimulation()">
+                                <label for="act-zoo" class="toggle-label block overflow-hidden h-6 rounded-full bg-slate-300 cursor-pointer"></label>
+                            </div>
+                        </div>
+
+                        <div class="flex items-center justify-between p-3 rounded-lg border border-slate-100 hover:bg-slate-50 transition-colors">
+                            <div>
+                                <span class="block text-sm font-bold text-text-main">منطقة الملاهي</span>
+                                <span class="block text-xs text-text-light mt-0.5">30 ج.م / فرد (متوسط)</span>
+                            </div>
+                            <div class="relative inline-block w-12 mr-2 align-middle select-none transition duration-200 ease-in">
+                                <input type="checkbox" id="act-rides" class="toggle-checkbox absolute block w-6 h-6 rounded-full bg-white border-4 appearance-none cursor-pointer" onchange="updateSimulation()">
+                                <label for="act-rides" class="toggle-label block overflow-hidden h-6 rounded-full bg-slate-300 cursor-pointer"></label>
+                            </div>
+                        </div>
+
+                        <div class="flex items-center justify-between p-3 rounded-lg border border-slate-100 hover:bg-slate-50 transition-colors">
+                            <div>
+                                <span class="block text-sm font-bold text-text-main">قطار النزهة</span>
+                                <span class="block text-xs text-text-light mt-0.5">20 ج.م / فرد</span>
+                            </div>
+                            <div class="relative inline-block w-12 mr-2 align-middle select-none transition duration-200 ease-in">
+                                <input type="checkbox" id="act-train" class="toggle-checkbox absolute block w-6 h-6 rounded-full bg-white border-4 appearance-none cursor-pointer" onchange="updateSimulation()">
+                                <label for="act-train" class="toggle-label block overflow-hidden h-6 rounded-full bg-slate-300 cursor-pointer"></label>
+                            </div>
+                        </div>
+
+                        <div class="flex items-center justify-between p-3 rounded-lg border border-slate-100 hover:bg-slate-50 transition-colors">
+                            <div>
+                                <span class="block text-sm font-bold text-text-main">بيت الرعب</span>
+                                <span class="block text-xs text-text-light mt-0.5">20 ج.م / فرد</span>
+                            </div>
+                            <div class="relative inline-block w-12 mr-2 align-middle select-none transition duration-200 ease-in">
+                                <input type="checkbox" id="act-horror" class="toggle-checkbox absolute block w-6 h-6 rounded-full bg-white border-4 appearance-none cursor-pointer" onchange="updateSimulation()">
+                                <label for="act-horror" class="toggle-label block overflow-hidden h-6 rounded-full bg-slate-300 cursor-pointer"></label>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Section 4: Logistics -->
+                <section class="bg-surface rounded-2xl p-6 shadow-soft border border-slate-100 interactive-card">
+                    <h2 class="text-lg font-bold text-text-main mb-6">اللوجستيات والانتقالات</h2>
+                    
+                    <div class="mb-6">
+                        <div class="flex justify-between items-end mb-3">
+                            <label class="block text-sm font-bold text-text-main">تكلفة أتوبيسات الانتقال</label>
+                            <span class="text-sm font-bold text-primary-600 bg-primary-50 px-2 py-1 rounded" id="transport-display">5,000 ج.م</span>
+                        </div>
+                        <input type="range" id="transport-slider" min="3000" max="8000" step="500" value="5000" oninput="updateSimulation()">
+                        <div class="flex justify-between text-xs text-text-light mt-2">
+                            <span>متوسط (3,000)</span>
+                            <span>الحد الأقصى (8,000)</span>
+                        </div>
+                    </div>
+
+                    <div class="bg-slate-50 rounded-lg p-4 border border-slate-100">
+                        <h3 class="text-sm font-bold text-text-main mb-3">ثوابت التغذية (للفرد الواحد)</h3>
+                        <div class="grid grid-cols-2 gap-4 text-sm">
+                            <div class="flex justify-between border-b border-slate-200 pb-2">
+                                <span class="text-text-muted">وجبة الإفطار:</span>
+                                <strong class="text-text-main">15 ج.م</strong>
+                            </div>
+                            <div class="flex justify-between border-b border-slate-200 pb-2">
+                                <span class="text-text-muted">وجبة الغداء:</span>
+                                <strong class="text-text-main">50 ج.م</strong>
+                            </div>
+                            <div class="flex justify-between col-span-2">
+                                <span class="text-text-muted">نثريات (مياه، خبز، تغليف):</span>
+                                <strong class="text-text-main">~ 17 ج.م للفرد</strong>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+            </div>
+
+            <!-- RIGHT PANEL: Analytics Dashboard (4 cols on lg) -->
+            <div class="lg:col-span-5">
+                <div class="sticky top-28 space-y-6">
+                    
+                    <!-- Grand Total Card -->
+                    <div class="bg-surface rounded-2xl p-6 shadow-soft border-2 border-primary-100 relative overflow-hidden">
+                        <div class="absolute top-0 right-0 w-32 h-32 bg-primary-50 rounded-full blur-3xl -mr-10 -mt-10 opacity-70"></div>
+                        
+                        <h2 class="text-sm font-bold text-text-muted mb-2 relative z-10">إجمالي الميزانية المطلوبة</h2>
+                        <div class="flex items-end gap-2 mb-1 relative z-10">
+                            <span class="text-4xl lg:text-5xl font-black text-text-main tracking-tighter" id="grand-total">0</span>
+                            <span class="text-lg font-bold text-text-light mb-1">ج.م</span>
+                        </div>
+                        
+                        <div class="mt-4 pt-4 border-t border-slate-100 relative z-10 flex justify-between items-center">
+                            <span class="text-sm text-text-muted">التكلفة الفعلية للفرد الواحد:</span>
+                            <span class="text-lg font-bold text-primary-600 bg-primary-50 px-3 py-1 rounded-lg" id="per-person-total">0 ج.م</span>
+                        </div>
+                    </div>
+
+                    <!-- Chart Card -->
+                    <div class="bg-surface rounded-2xl p-6 shadow-soft border border-slate-100">
+                        <h3 class="text-sm font-bold text-text-main mb-4">توزيع النفقات</h3>
+                        <div class="h-64 w-full relative">
+                            <canvas id="costChart"></canvas>
+                        </div>
+                    </div>
+
+                    <!-- Breakdown List -->
+                    <div class="bg-surface rounded-2xl p-6 shadow-soft border border-slate-100">
+                        <h3 class="text-sm font-bold text-text-main mb-4">التفاصيل المالية</h3>
+                        <ul class="space-y-3 text-sm">
+                            <li class="flex justify-between items-center">
+                                <div class="flex items-center gap-2">
+                                    <span class="w-3 h-3 rounded bg-[#30a7b4]"></span>
+                                    <span class="text-text-muted">رسوم الدخول</span>
+                                </div>
+                                <strong class="text-text-main" id="breakdown-entry">0 ج.م</strong>
+                            </li>
+                            <li class="flex justify-between items-center">
+                                <div class="flex items-center gap-2">
+                                    <span class="w-3 h-3 rounded bg-[#2c8594]"></span>
+                                    <span class="text-text-muted">الأنشطة الإضافية</span>
+                                </div>
+                                <strong class="text-text-main" id="breakdown-activities">0 ج.م</strong>
+                            </li>
+                            <li class="flex justify-between items-center">
+                                <div class="flex items-center gap-2">
+                                    <span class="w-3 h-3 rounded bg-[#60b7c4]"></span>
+                                    <span class="text-text-muted">التغذية الشاملة</span>
+                                </div>
+                                <strong class="text-text-main" id="breakdown-food">0 ج.م</strong>
+                            </li>
+                            <li class="flex justify-between items-center">
+                                <div class="flex items-center gap-2">
+                                    <span class="w-3 h-3 rounded bg-[#94d3db]"></span>
+                                    <span class="text-text-muted">الانتقالات</span>
+                                </div>
+                                <strong class="text-text-main" id="breakdown-transport">0 ج.م</strong>
+                            </li>
+                            <li class="flex justify-between items-center">
+                                <div class="flex items-center gap-2">
+                                    <span class="w-3 h-3 rounded bg-[#cbd5e1]"></span>
+                                    <span class="text-text-muted">مصروفات أخرى (بنر)</span>
+                                </div>
+                                <strong class="text-text-main" id="breakdown-misc">400 ج.م</strong>
+                            </li>
+                        </ul>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+
+        <div class="mt-12 bg-surface rounded-2xl p-8 shadow-soft border border-slate-100">
+            <div class="max-w-3xl mx-auto">
+                <h2 class="text-xl font-bold text-text-main mb-8 text-center">التسلسل الزمني المقترح لليوم</h2>
+                
+                <div class="relative border-r-2 border-slate-100 pr-6 space-y-8">
+                    <!-- Step 1 -->
+                    <div class="relative">
+                        <span class="absolute right-[-33px] top-1 w-4 h-4 rounded-full bg-slate-200 border-4 border-white shadow-sm"></span>
+                        <div class="flex flex-col sm:flex-row sm:items-baseline gap-2 mb-1">
+                            <span class="text-sm font-black text-primary-500 w-24">08:00 صباحاً</span>
+                            <h4 class="text-base font-bold text-text-main">التجمع أمام المؤسسة</h4>
+                        </div>
+                        <p class="text-sm text-text-muted mr-0 sm:mr-26">حصر الأعداد، التأكد من الجاهزية، وتنظيم المجموعات.</p>
+                    </div>
+                    
+                    <!-- Step 2 -->
+                    <div class="relative">
+                        <span class="absolute right-[-33px] top-1 w-4 h-4 rounded-full bg-primary-500 border-4 border-white shadow-sm"></span>
+                        <div class="flex flex-col sm:flex-row sm:items-baseline gap-2 mb-1">
+                            <span class="text-sm font-black text-primary-500 w-24">10:00 صباحاً</span>
+                            <h4 class="text-base font-bold text-text-main">الوصول للحديقة وتناول الإفطار</h4>
+                        </div>
+                        <p class="text-sm text-text-muted mr-0 sm:mr-26">إنهاء إجراءات الدخول، توزيع وجبة الإفطار (باتيه وعصير) لبدء اليوم بنشاط.</p>
+                    </div>
+
+                    <!-- Step 3 -->
+                    <div class="relative">
+                        <span class="absolute right-[-33px] top-1 w-4 h-4 rounded-full bg-slate-200 border-4 border-white shadow-sm"></span>
+                        <div class="flex flex-col sm:flex-row sm:items-baseline gap-2 mb-1">
+                            <span class="text-sm font-black text-primary-500 w-24">11:00 صباحاً</span>
+                            <h4 class="text-base font-bold text-text-main">البرنامج الترفيهي المفتوح</h4>
+                        </div>
+                        <p class="text-sm text-text-muted mr-0 sm:mr-26 bg-slate-50 p-3 rounded-lg mt-2 border border-slate-100">
+                            تنفيذ الأنشطة الجماعية، الألعاب الحركية، والمشاركة في الأنشطة الإضافية المختارة (حديقة حيوان، ملاهي... إلخ).
+                        </p>
+                    </div>
+
+                    <!-- Step 4 -->
+                    <div class="relative">
+                        <span class="absolute right-[-33px] top-1 w-4 h-4 rounded-full bg-primary-500 border-4 border-white shadow-sm"></span>
+                        <div class="flex flex-col sm:flex-row sm:items-baseline gap-2 mb-1">
+                            <span class="text-sm font-black text-primary-500 w-24">02:30 ظهراً</span>
+                            <h4 class="text-base font-bold text-text-main">فترة الراحة وتناول الغداء</h4>
+                        </div>
+                    </div>
+
+                    <!-- Step 5 -->
+                    <div class="relative">
+                        <span class="absolute right-[-33px] top-1 w-4 h-4 rounded-full bg-slate-200 border-4 border-white shadow-sm"></span>
+                        <div class="flex flex-col sm:flex-row sm:items-baseline gap-2 mb-1">
+                            <span class="text-sm font-black text-primary-500 w-24">06:00 مساءً</span>
+                            <h4 class="text-base font-bold text-text-main">التجمع النهائي للعودة</h4>
+                        </div>
+                        <p class="text-sm text-text-muted mr-0 sm:mr-26">التقاط الصور التذكارية، حصر الأعداد مرة أخرى، والتحرك باتجاه مقر المؤسسة.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </main>
+
+    <script>
+        // Constants and Rates
+        const RATES = {
+            food: {
+                breakfast: 15,
+                lunch: 50,
+                miscPerPerson: 17 // Represents bread, water, packaging approx per person
+            },
+            venue: {
+                international: { entry: 20 },
+                azhar: { entry: 35 }
+            },
+            activities: {
+                zoo: 15,
+                rides: 30,
+                train: 20,
+                horror: 20
+            },
+            miscFixed: 400 // Banner
+        };
+
+        // Application State
+        let state = {
+            attendees: 65,
+            venue: 'international',
+            transport: 5000,
+            activities: {
+                zoo: false,
+                rides: false,
+                train: false,
+                horror: false
+            },
+            previousTotal: 0
+        };
+
+        let myChart = null;
+
+        // Number Animation Helper
+        function animateValue(obj, start, end, duration) {
+            let startTimestamp = null;
+            const step = (timestamp) => {
+                if (!startTimestamp) startTimestamp = timestamp;
+                const progress = Math.min((timestamp - startTimestamp) / duration, 1);
+                // Ease out cubic
+                const easeProgress = 1 - Math.pow(1 - progress, 3);
+                const currentVal = Math.floor(easeProgress * (end - start) + start);
+                obj.innerHTML = currentVal.toLocaleString();
+                if (progress < 1) {
+                    window.requestAnimationFrame(step);
+                } else {
+                    obj.innerHTML = end.toLocaleString(); // Ensure exact final value
+                }
+            };
+            window.requestAnimationFrame(step);
+        }
+
+        // Initialize App
+        function initApp() {
+            initChart();
+            updateSimulation(); // First calculation
+        }
+
+        // Initialize Chart.js
+        function initChart() {
+            Chart.defaults.font.family = "'Tajawal', sans-serif";
+            const ctx = document.getElementById('costChart').getContext('2d');
+            
+            myChart = new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    labels: ['الدخول', 'الأنشطة', 'التغذية', 'الانتقالات', 'أخرى'],
+                    datasets: [{
+                        data: [0, 0, 0, 0, 0],
+                        backgroundColor: [
+                            '#30a7b4', // Primary
+                            '#2c8594', // Primary dark
+                            '#60b7c4', // Primary light
+                            '#94d3db', // Primary lighter
+                            '#cbd5e1'  // Slate 300
+                        ],
+                        borderWidth: 0,
+                        hoverOffset: 4
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    cutout: '70%',
+                    plugins: {
+                        legend: { display: false },
+                        tooltip: {
+                            backgroundColor: '#1e293b',
+                            titleFont: { size: 13, family: 'Tajawal' },
+                            bodyFont: { size: 14, family: 'Tajawal', weight: 'bold' },
+                            padding: 12,
+                            cornerRadius: 8,
+                            displayColors: true,
+                            callbacks: {
+                                label: function(context) {
+                                    return ' ' + context.parsed.toLocaleString() + ' ج.م';
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        // Main Update Logic
+        function updateSimulation() {
+            // 1. Gather Inputs
+            state.attendees = parseInt(document.getElementById('attendees-slider').value);
+            state.transport = parseInt(document.getElementById('transport-slider').value);
+            state.venue = document.querySelector('input[name="venue"]:checked').value;
+            
+            state.activities.zoo = document.getElementById('act-zoo').checked;
+            state.activities.rides = document.getElementById('act-rides').checked;
+            state.activities.train = document.getElementById('act-train').checked;
+            state.activities.horror = document.getElementById('act-horror').checked;
+
+            // Handle UI toggle for Activities Section (Disable if Azhar)
+            const activitiesSection = document.getElementById('activities-section');
+            if (state.venue === 'azhar') {
+                activitiesSection.style.opacity = '0.4';
+                activitiesSection.style.pointerEvents = 'none';
+            } else {
+                activitiesSection.style.opacity = '1';
+                activitiesSection.style.pointerEvents = 'auto';
+            }
+
+            // 2. Calculate Costs
+            // Food
+            const foodPerPerson = RATES.food.breakfast + RATES.food.lunch + RATES.food.miscPerPerson;
+            const totalFood = foodPerPerson * state.attendees;
+
+            // Entry
+            const entryPerPerson = RATES.venue[state.venue].entry;
+            const totalEntry = entryPerPerson * state.attendees;
+
+            // Activities (Only if International Park)
+            let actPerPerson = 0;
+            if (state.venue === 'international') {
+                if (state.activities.zoo) actPerPerson += RATES.activities.zoo;
+                if (state.activities.rides) actPerPerson += RATES.activities.rides;
+                if (state.activities.train) actPerPerson += RATES.activities.train;
+                if (state.activities.horror) actPerPerson += RATES.activities.horror;
+            }
+            const totalActivities = actPerPerson * state.attendees;
+
+            // Transport & Misc
+            const totalTransport = state.transport;
+            const totalMisc = RATES.miscFixed;
+
+            // Grand Total
+            const grandTotal = totalFood + totalEntry + totalActivities + totalTransport + totalMisc;
+            const perPersonTotal = Math.round(grandTotal / state.attendees);
+
+            // 3. Update UI Elements
+            
+            // Sliders Display
+            document.getElementById('attendees-display').innerText = state.attendees;
+            document.getElementById('transport-display').innerText = totalTransport.toLocaleString() + ' ج.م';
+            
+            // Breakdowns
+            document.getElementById('activities-subtotal').innerText = totalActivities.toLocaleString();
+            document.getElementById('breakdown-entry').innerText = totalEntry.toLocaleString() + ' ج.م';
+            document.getElementById('breakdown-activities').innerText = totalActivities.toLocaleString() + ' ج.م';
+            document.getElementById('breakdown-food').innerText = totalFood.toLocaleString() + ' ج.م';
+            document.getElementById('breakdown-transport').innerText = totalTransport.toLocaleString() + ' ج.م';
+            
+            // Per Person
+            document.getElementById('per-person-total').innerText = perPersonTotal.toLocaleString() + ' ج.م';
+
+            // Animate Grand Totals
+            const totalEls = [document.getElementById('grand-total'), document.getElementById('header-total')];
+            
+            totalEls.forEach(el => {
+                if (el && el.classList) {
+                    if(state.previousTotal !== grandTotal) {
+                        // Flash effect
+                        el.classList.remove('value-update');
+                        void el.offsetWidth; // trigger reflow
+                        el.classList.add('value-update');
+                        // Animate number
+                        animateValue(el, state.previousTotal || 0, grandTotal, 500);
+                    } else {
+                        el.textContent = grandTotal.toLocaleString();
+                    }
+                }
+            });
+
+            state.previousTotal = grandTotal;
+
+            // 4. Update Chart
+            myChart.data.datasets[0].data = [
+                totalEntry,
+                totalActivities,
+                totalFood,
+                totalTransport,
+                totalMisc
+            ];
+            myChart.update();
+        }
+
+        // Run on load
+        window.addEventListener('DOMContentLoaded', initApp);
+    </script>
+</body>
+</html>
